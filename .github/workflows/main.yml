@@ -1,0 +1,43 @@
+
+name: Build Orange Car Game APK
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Create Android project
+        run: |
+          mkdir app
+          cd app
+          npm init -y
+          npm install @capacitor/core @capacitor/cli @capacitor/android
+          npx cap init "Orange Car Game" "com.orange.cargame" --web-dir=www
+          mkdir www
+          cp ../orange_car_rider_game-1.html www/index.html
+          npx cap add android
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Orange-Car-Game-APK
+          path: app/android/app/build/outputs/apk/debug/app-debug.apk
